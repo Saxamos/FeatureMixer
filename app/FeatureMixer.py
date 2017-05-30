@@ -11,10 +11,12 @@ def extract_feature_from_matrix(matrix, feature_rank):
 
 
 def operation(operator, matrix, tuple_feature):
+    feature_1 = extract_feature_from_matrix(matrix, tuple_feature[0])
+    feature_2 = extract_feature_from_matrix(matrix, tuple_feature[1])
     if operator == "addition":
-        feature_1 = extract_feature_from_matrix(matrix, tuple_feature[0])
-        feature_2 = extract_feature_from_matrix(matrix, tuple_feature[1])
         return feature_1 + feature_2
+    if operator == "multiplication":
+        return feature_1 * feature_2
 
 
 def add_feature_to_matrix(matrix, feature):
@@ -34,5 +36,5 @@ def feature_creation(data_frame, operator):
     list_of_feature = create_list_of_feature_number_to_apply_operation(matrix.shape[1])
     for tuple_feature in list_of_feature:
         new_feature = operation(operator, matrix, tuple_feature)
-        matrix_with_new_feature = add_feature_to_matrix(matrix, new_feature)
-    return matrix_with_new_feature
+        matrix = add_feature_to_matrix(matrix, new_feature)
+    return matrix

@@ -113,13 +113,34 @@ def test_create_all_new_feature_combination_with_addition():
     })
     expected = np.matrix([
         [0, 1, 4, 1, 4, 5],
-        [0, 1, 1, 1, 1, 1],
+        [0, 1, 1, 1, 1, 2],
         [0, 2, 2, 2, 2, 4],
         [2, 3, 5, 5, 7, 8]
     ])
 
     # When
     result = feature_creation(pandas_data_frame, 'addition')
+
+    # Then
+    assert (result == expected).all()
+
+
+def test_create_all_new_feature_combination_with_multiplication():
+    # Given
+    pandas_data_frame = pd.DataFrame(data={
+        'feature_1': [0, 0, 0, 2],
+        'feature_2': [1, 1, 2, 3],
+        'feature_3': [4, 1, 2, 5]
+    })
+    expected = np.matrix([
+        [0, 1, 4, 0, 0, 4],
+        [0, 1, 1, 0, 0, 1],
+        [0, 2, 2, 0, 0, 4],
+        [2, 3, 5, 6, 10, 15]
+    ])
+
+    # When
+    result = feature_creation(pandas_data_frame, 'multiplication')
 
     # Then
     assert (result == expected).all()
