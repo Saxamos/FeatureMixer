@@ -1,4 +1,4 @@
 .idea
 .cache
 /venv/lib/python3.4/*
-/tests/__pychache__/
+/tests/__pychache__*
