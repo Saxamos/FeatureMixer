@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from app.FeatureMixer import transform_pandas_to_numpy, operation, extract_feature_from_matrix, feature_creation, \
-    add_feature_to_matrix, create_list_of_feature_number_to_apply_operation
+    add_feature_to_matrix, create_list_of_feature_number_to_apply_operation, dummy_encode_pandas_features
 
 
 def test_transform_pandas_frame_into_numpy_matrix():
@@ -47,7 +48,7 @@ def test_extract_feature_0_from_numpy_matrix():
 
 def test_operation_addition_add_features():
     # Given
-    operator = "addition"
+    operator = 'addition'
     matrix = np.matrix([
         [0, 1, 4],
         [0, 1, 1],
@@ -144,3 +145,77 @@ def test_create_all_new_feature_combination_with_multiplication():
 
     # Then
     assert (result == expected).all()
+
+
+def test_one_encode_the_feature_of_strings_in_pandas_data_frame():
+    # Given
+    pandas_data_frame = pd.DataFrame(data={
+        'feature_1': ['A', 'A', 'B', 'D'],
+        'feature_2': [1, 1, 2, 3],
+        'feature_3': [4, 1, 2, 5],
+    })
+    expected_data_frame = pd.DataFrame(data={
+        'feature_1': [0, 0, 1, 2],
+        'feature_2': [1, 1, 2, 3],
+        'feature_3': [4, 1, 2, 5],
+    })
+
+    # When
+    result_data_frame = dummy_encode_pandas_features(pandas_data_frame)
+
+    # Then
+    for col in pandas_data_frame.columns:
+        assert (result_data_frame[col] == expected_data_frame[col]).all()
+
+
+@pytest.mark.skip
+def test_get_error_when_one_encode_feature_semi_string_semi_int():
+    # Given
+    pandas_data_frame = pd.DataFrame(data={
+        'feature_1': ['A', 'A', 'B', 'D'],
+        'feature_2': [1, 1, 2, 3],
+        'feature_3': [4, 1, 2, 5],
+        'feature_4': ['R', 1, 2, 'S'],
+    })
+    expected_data_frame = pd.DataFrame(data={
+        'feature_1': [0, 0, 1, 2],
+        'feature_2': [1, 1, 2, 3],
+        'feature_3': [4, 1, 2, 5],
+        'feature_4': [0, 1, 2, 3],
+    })
+
+    # When
+    result_data_frame = dummy_encode_pandas_features(pandas_data_frame)
+
+    # Then
+    assert print('blabla')
+
+
+def test_create_all_feature_combination_with_multiplication_from_non_binary_data_frame():
+    # Given
+    pandas_data_frame = pd.DataFrame(data={
+        'feature_1': [2, 1, 2, 0],
+        'feature_2': ['A', 'A', 'B', 'C'],
+        'feature_3': [4, 1, 2, 5]
+    })
+    expected = np.matrix([
+        [2, 0, 4, 0, 8, 0],
+        [1, 0, 1, 0, 1, 0],
+        [2, 1, 2, 2, 4, 2],
+        [0, 2, 5, 0, 0, 10]
+    ])
+
+    # When
+    result = feature_creation(pandas_data_frame, 'multiplication')
+
+    # Then
+    assert (result == expected).all()
+
+
+# TODO :
+#         - normaliser les features
+#         - selection (1. par correlation 2. par importance: FI?)
+#         - biner les features
+#         - donner le FI classement
+#         - reprendre les tests skip
+#         - ajout d'opérations
