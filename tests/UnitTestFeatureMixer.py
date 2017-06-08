@@ -1,7 +1,10 @@
 import pandas as pd
+import numpy as np
 import pytest
 
-from app.FeatureMixer import *
+from app.FeatureMixer import _operation, _add_feature_to_matrix_if_not_too_correlated, _get_number_of_column, \
+    _are_feature_too_correlated, _scale_one_numpy_feature, _scale_features_from_pandas_to_numpy_matrix, \
+    _dummy_encode_pandas_features, _create_list_of_feature_number_to_apply_operation, _extract_feature_from_matrix
 
 
 def test_extract_feature_0_from_numpy_matrix():
@@ -16,13 +19,12 @@ def test_extract_feature_0_from_numpy_matrix():
     expected = [[0], [0], [0], [2]]
 
     # When
-    result = extract_feature_from_matrix(np_matrix, feature_rank)
+    result = _extract_feature_from_matrix(np_matrix, feature_rank)
 
     # Then
     assert (result == expected).all()
 
 
-@pytest.mark.skip # mocker pour devenir TU + faire celui pour autres opérations
 def test_operation_addition_add_features():
     # Given
     operator = 'addition'
@@ -36,13 +38,13 @@ def test_operation_addition_add_features():
     expected = [[5], [2], [4], [8]]
 
     # When
-    result = operation(operator, matrix, tuple_feature)
+    result = _operation(operator, matrix, tuple_feature)
 
     # Then
     assert (result == expected).all()
 
 
-def test_append_new_feature_to_matrix():
+def test_append_new_feature_not_too_correlated_to_matrix():
     # Given
     matrix = np.matrix([
         [0, 1, 4],
@@ -50,19 +52,59 @@ def test_append_new_feature_to_matrix():
         [0, 2, 2],
         [2, 3, 5]
     ])
-    feature = np.array([1, 1, 2, 5])
+    feature = np.array([1, 1, 9, 9])
     expected = np.matrix([
         [0, 1, 4, 1],
         [0, 1, 1, 1],
-        [0, 2, 2, 2],
-        [2, 3, 5, 5]
+        [0, 2, 2, 9],
+        [2, 3, 5, 9]
     ])
 
     # When
-    result = add_feature_to_matrix(matrix, feature)
+    result = _add_feature_to_matrix_if_not_too_correlated(matrix, feature)
 
     # Then
     assert (result == expected).all()
+
+
+def test_don_t_append_new_feature_correlated_to_matrix():
+    # Given
+    matrix = np.matrix([
+        [0, 1, 4],
+        [0, 1, 1],
+        [0, 2, 2],
+        [2, 3, 5]
+    ])
+    feature = np.array([1, 1, 1, 5])
+    expected = np.matrix([
+        [0, 1, 4],
+        [0, 1, 1],
+        [0, 2, 2],
+        [2, 3, 5]
+    ])
+
+    # When
+    result = _add_feature_to_matrix_if_not_too_correlated(matrix, feature)
+
+    # Then
+    assert (result == expected).all()
+
+
+def test_get_number_of_column_in_matrix():
+    # Given
+    matrix = np.matrix([
+        [0, 1, 4],
+        [0, 1, 1],
+        [0, 2, 2],
+        [2, 3, 5]
+    ])
+    expected = 3
+
+    # When
+    result = _get_number_of_column(matrix)
+
+    # Then
+    assert result == expected
 
 
 def test_create_tuple_of_col_to_apply_operation():
@@ -75,10 +117,48 @@ def test_create_tuple_of_col_to_apply_operation():
     ]
 
     # When
-    result = create_list_of_feature_number_to_apply_operation(shape_col)
+    result = _create_list_of_feature_number_to_apply_operation(shape_col)
 
     # Then
     assert result == expected
+
+
+def test_operation_addition_on_two_features():
+    # Given
+    operator = 'addition'
+    matrix = np.matrix([
+        [0, 1, 4],
+        [0, 1, 1],
+        [0, 2, 2],
+        [2, 3, 5]
+    ])
+    tuple_feature = (1, 2)
+    expected = [[5], [2], [4], [8]]
+
+    # When
+    result = _operation(operator, matrix, tuple_feature)
+
+    # Then
+    assert (result == expected).all()
+
+
+def test_operation_multiplication_one_two_features():
+    # Given
+    operator = 'multiplication'
+    matrix = np.matrix([
+        [0, 1, 4],
+        [0, 1, 1],
+        [0, 2, 2],
+        [2, 3, 5]
+    ])
+    tuple_feature = (1, 2)
+    expected = [[4], [1], [4], [15]]
+
+    # When
+    result = _operation(operator, matrix, tuple_feature)
+
+    # Then
+    assert (result == expected).all()
 
 
 @pytest.mark.skip # a reparer ou cas a traiter
@@ -118,7 +198,7 @@ def test_one_encode_the_feature_of_strings_in_pandas_data_frame():
     })
 
     # When
-    result_data_frame = dummy_encode_pandas_features(pandas_data_frame)
+    result_data_frame = _dummy_encode_pandas_features(pandas_data_frame)
 
     # Then
     for col in pandas_data_frame.columns:
@@ -139,7 +219,7 @@ def test_scale_the_features_from_pandas():
     ])
 
     # When
-    result = scale_features_from_pandas_to_numpy_matrix(pandas_data_frame)
+    result = _scale_features_from_pandas_to_numpy_matrix(pandas_data_frame)
 
     # Then
     assert (result == expected).all()
@@ -157,10 +237,50 @@ def test_scale_the_created_feature():
     expected = np.array([1, 0, 0.5])
 
     # When
-    result = scale_one_numpy_feature(feature_created)
+    result = _scale_one_numpy_feature(feature_created)
 
     # Then
     assert (result == expected).all()
+
+
+def test_return_true_if_features_are_too_correlated():
+    # Given
+    feature_1 = np.array([0, 2, 1])
+    feature_2 = np.array([2, 4, 2.5])
+    expected = True
+
+    # When
+    result = _are_feature_too_correlated(feature_1, feature_2)
+
+    # Then
+    assert result == expected
+
+
+def test_return_true_if_features_are_too_negatively_correlated():
+    # Given
+    feature_1 = np.array([0, 2, 1])
+    feature_2 = np.array([0, -2, -1])
+    expected = True
+
+    # When
+    result = _are_feature_too_correlated(feature_1, feature_2)
+
+    # Then
+    assert result == expected
+
+
+def test_return_false_if_features_are_not_too_correlated():
+    # Given
+    feature_1 = np.array([0, 2, 4])
+    feature_2 = np.array([2, 4, 1])
+    expected = False
+
+    # When
+    result = _are_feature_too_correlated(feature_1, feature_2)
+
+    # Then
+    assert result == expected
+
 
 # TODO :
 #         - gérer les noms des features
