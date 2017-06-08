@@ -1,9 +1,9 @@
 import numpy as np
-import sklearn.preprocessing
+import sklearn.preprocessing as preproc
 
 
 def dummy_encode_pandas_features(data_frame):
-    label_encoder = sklearn.preprocessing.LabelEncoder()
+    label_encoder = preproc.LabelEncoder()
     columns_to_encode = list(data_frame.select_dtypes(include=['category', 'object']))
     numeric_data_frame = data_frame.copy()
     for feature in columns_to_encode:
@@ -12,11 +12,6 @@ def dummy_encode_pandas_features(data_frame):
         except:
             print('Error encoding ' + feature)
     return numeric_data_frame
-
-
-def transform_pandas_to_numpy(data_frame):
-    np_array = data_frame.as_matrix()
-    return np_array
 
 
 def extract_feature_from_matrix(matrix, feature_rank):
@@ -29,7 +24,7 @@ def operation(operator, matrix, tuple_feature):
     if operator == 'addition':
         return feature_1 + feature_2
     if operator == 'multiplication':
-        return feature_1 * feature_2
+        return np.multiply(feature_1, feature_2)
 
 
 def add_feature_to_matrix(matrix, feature):
@@ -44,11 +39,21 @@ def create_list_of_feature_number_to_apply_operation(shape_col):
     return [(i, j) for i in range(shape_col) for j in range(i, shape_col) if i != j]
 
 
+def scale_features_from_pandas_to_numpy_matrix(data_frame):
+    scaler = preproc.MinMaxScaler()
+    return scaler.fit_transform(data_frame)
+
+
+def scale_one_numpy_feature(feature):
+    return (feature - feature.min()) / (feature.max() - feature.min())
+
+
 def feature_creation(data_frame, operator):
     dummy_data_frame = dummy_encode_pandas_features(data_frame)
-    matrix = transform_pandas_to_numpy(dummy_data_frame)
-    list_of_feature = create_list_of_feature_number_to_apply_operation(matrix.shape[1])
+    scaled_matrix = scale_features_from_pandas_to_numpy_matrix(dummy_data_frame)
+    list_of_feature = create_list_of_feature_number_to_apply_operation(scaled_matrix.shape[1])
     for tuple_feature in list_of_feature:
-        new_feature = operation(operator, matrix, tuple_feature)
-        matrix = add_feature_to_matrix(matrix, new_feature)
-    return matrix
+        new_feature = operation(operator, scaled_matrix, tuple_feature)
+        new_feature_scaled = scale_one_numpy_feature(new_feature)
+        scaled_matrix = add_feature_to_matrix(scaled_matrix, new_feature_scaled)
+    return scaled_matrix
