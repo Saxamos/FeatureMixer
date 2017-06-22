@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import sklearn.preprocessing as preproc
 import scipy as sp
 
@@ -6,12 +7,16 @@ import scipy as sp
 def feature_creation(data_frame, operator):
     dummy_data_frame = _dummy_encode_pandas_features(data_frame)
     scaled_matrix = _scale_features_from_pandas_to_numpy_matrix(dummy_data_frame)
+    list_feature_name = data_frame.columns.tolist()
     list_of_feature = _create_list_of_feature_number_to_apply_operation(scaled_matrix.shape[1])
     for tuple_feature in list_of_feature:
         new_feature = _operation(operator, scaled_matrix, tuple_feature)
         new_feature_scaled = _scale_one_numpy_feature(new_feature)
-        scaled_matrix = _add_feature_to_matrix_if_not_too_correlated(scaled_matrix, new_feature_scaled)
-    return scaled_matrix
+        scaled_matrix, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(scaled_matrix,
+                                                                                        new_feature_scaled,
+                                                                                        list_feature_name)
+    list_feature_name.append('feature_1*feature_2')
+    return pd.DataFrame(scaled_matrix, columns=list_feature_name)
 
 
 def _dummy_encode_pandas_features(data_frame):
@@ -39,16 +44,16 @@ def _operation(operator, matrix, tuple_feature):
         return np.multiply(feature_1, feature_2)
 
 
-def _add_feature_to_matrix_if_not_too_correlated(matrix, feature):
+def _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name):
     for i in range(_get_number_of_column(matrix)):
         existing_feature = _extract_feature_from_matrix(matrix, i)
         if _are_feature_too_correlated(feature, existing_feature):
-            return matrix
+            return matrix, list_feature_name
     shape = matrix.shape
     new_matrix = np.zeros((shape[0], shape[1] + 1))
     new_matrix[:, :-1] = matrix
     new_matrix[:, -1] = feature
-    return new_matrix
+    return new_matrix, list_feature_name
 
 
 def _get_number_of_column(matrix):
@@ -70,4 +75,4 @@ def _scale_one_numpy_feature(feature):
 
 def _are_feature_too_correlated(feature_1, feature_2):
     spearman_correlation = sp.stats.spearmanr(feature_1, feature_2)[0]
-    return  np.abs(spearman_correlation) > 0.99
+    return np.abs(spearman_correlation) > 0.99

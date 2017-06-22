@@ -59,12 +59,27 @@ def test_append_new_feature_not_too_correlated_to_matrix():
         [0, 2, 2, 9],
         [2, 3, 5, 9]
     ])
+    list_feature_name = ['feature_1']
 
     # When
-    result = _add_feature_to_matrix_if_not_too_correlated(matrix, feature)
+    result, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name)
 
     # Then
     assert (result == expected).all()
+
+
+def test_add_feature_to_matrix_if_not_too_correlated_append_new_variable_name_to_column_list():
+    # Given
+    list_feature_name = ['feature_1']
+    expected_new_feature_name = ['feature_1', 'feature_1*feature_2']
+    matrix = np.matrix([[0], [0], [0], [2]])
+    feature = np.array([1, 1, 9, 9])
+
+    # When
+    matrix_result, new_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name)
+
+    # Then
+    assert new_feature_name == expected_new_feature_name
 
 
 def test_don_t_append_new_feature_correlated_to_matrix():
@@ -82,9 +97,10 @@ def test_don_t_append_new_feature_correlated_to_matrix():
         [0, 2, 2],
         [2, 3, 5]
     ])
+    list_feature_name = ['feature_1']
 
     # When
-    result = _add_feature_to_matrix_if_not_too_correlated(matrix, feature)
+    result, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name)
 
     # Then
     assert (result == expected).all()
@@ -282,9 +298,14 @@ def test_return_false_if_features_are_not_too_correlated():
     assert result == expected
 
 
+
+
 # TODO :
 #         - gérer les noms des features
+#   + retourner pandas ac nom a la fin
+#   + faire un dicti avec les nom des features créées
 #         - selection (1. par correlation 2. par importance: FI?)
+#         - feature aggregateur?
 #         - biner les features
 #         - donner le FI classement
 #         - reprendre les tests skip

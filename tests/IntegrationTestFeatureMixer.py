@@ -42,7 +42,6 @@ def test_create_all_new_feature_combination_with_multiplication():
     result = feature_creation(pandas_data_frame, 'multiplication')
 
     # Then
-    print(result)
     assert (result == expected).all()
 
 
@@ -52,15 +51,14 @@ def test_create_all_feature_combination_with_multiplication_from_non_numeric_dat
         'feature_1': [2, 1, 2, 0],
         'feature_2': ['A', 'A', 'B', 'C'],
     })
-    expected = np.matrix([
-        [1.0, 0.0, 0],
-        [0.5, 0.0, 0],
-        [1.0, 0.5, 1],
-        [0.0, 1.0, 0]
-    ])
+    expected = pd.DataFrame(data={
+        'feature_1': [1, 0.5, 1, 0],
+        'feature_2': [0, 0, 0.5, 1]
+    })
+    expected['feature_1*feature_2'] = [0.0, 0.0, 1.0, 0.0]
 
     # When
     result = feature_creation(pandas_data_frame, 'multiplication')
 
     # Then
-    assert (result == expected).all()
+    assert result.equals(expected)
