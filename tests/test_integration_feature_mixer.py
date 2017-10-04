@@ -1,4 +1,4 @@
-from app.FeatureMixer import *
+from app.feature_mixer import *
 
 
 def test_create_all_new_feature_combination_with_addition():

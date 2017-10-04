@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from app.FeatureMixer import (_operation, _add_feature_to_matrix_if_not_too_correlated,
-                              _get_number_of_column, _are_feature_too_correlated,
-                              _scale_one_numpy_feature, _scale_features_from_pandas_to_numpy_matrix,
-                              _dummy_encode_pandas_features,
-                              _create_list_of_feature_number_to_apply_operation,
-                              _extract_feature_from_matrix)
+from app.feature_mixer import (_operation, _add_feature_to_matrix_if_not_too_correlated,
+                               _get_number_of_column, _are_feature_too_correlated,
+                               _scale_one_numpy_feature, _scale_features_from_pandas_to_numpy_matrix,
+                               _dummy_encode_pandas_features,
+                               _create_list_of_feature_number_to_apply_operation,
+                               _extract_feature_from_matrix)
 
 
 def test_extract_feature_0_from_numpy_matrix():
