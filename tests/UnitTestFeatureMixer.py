@@ -1,10 +1,13 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
-from app.FeatureMixer import _operation, _add_feature_to_matrix_if_not_too_correlated, _get_number_of_column, \
-    _are_feature_too_correlated, _scale_one_numpy_feature, _scale_features_from_pandas_to_numpy_matrix, \
-    _dummy_encode_pandas_features, _create_list_of_feature_number_to_apply_operation, _extract_feature_from_matrix
+from app.FeatureMixer import (_operation, _add_feature_to_matrix_if_not_too_correlated,
+                              _get_number_of_column, _are_feature_too_correlated,
+                              _scale_one_numpy_feature, _scale_features_from_pandas_to_numpy_matrix,
+                              _dummy_encode_pandas_features,
+                              _create_list_of_feature_number_to_apply_operation,
+                              _extract_feature_from_matrix)
 
 
 def test_extract_feature_0_from_numpy_matrix():
@@ -62,7 +65,8 @@ def test_append_new_feature_not_too_correlated_to_matrix():
     list_feature_name = ['feature_1']
 
     # When
-    result, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name)
+    result, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature,
+                                                                             list_feature_name)
 
     # Then
     assert (result == expected).all()
@@ -76,7 +80,9 @@ def test_add_feature_to_matrix_if_not_too_correlated_append_new_variable_name_to
     feature = np.array([1, 1, 9, 9])
 
     # When
-    matrix_result, new_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name)
+    matrix_result, new_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix,
+                                                                                   feature,
+                                                                                   list_feature_name)
 
     # Then
     assert new_feature_name == expected_new_feature_name
@@ -100,7 +106,8 @@ def test_don_t_append_new_feature_correlated_to_matrix():
     list_feature_name = ['feature_1']
 
     # When
-    result, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature, list_feature_name)
+    result, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(matrix, feature,
+                                                                             list_feature_name)
 
     # Then
     assert (result == expected).all()
@@ -177,7 +184,7 @@ def test_operation_multiplication_one_two_features():
     assert (result == expected).all()
 
 
-@pytest.mark.skip # a reparer ou cas a traiter
+@pytest.mark.skip  # a reparer ou cas a traiter
 def test_get_error_when_one_encode_feature_semi_string_semi_int():
     # Given
     pandas_data_frame = pd.DataFrame(data={
@@ -297,15 +304,13 @@ def test_return_false_if_features_are_not_too_correlated():
     # Then
     assert result == expected
 
-
-
-
 # TODO :
+#         - $$kwargs pour mettre toutes les operations qu'on veut!!
 #         - gérer les noms des features
+#         - ajout de l'entropie mutuelle au lieu de corr
 #   + retourner pandas ac nom a la fin
-#   + faire un dicti avec les nom des features créées
 #         - selection (1. par correlation 2. par importance: FI?)
-#         - feature aggregateur?
+#         - feature aggregateur? et PCA ICA
 #         - biner les features
 #         - donner le FI classement
 #         - reprendre les tests skip

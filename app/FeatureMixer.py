@@ -15,7 +15,6 @@ def feature_creation(data_frame, operator):
         scaled_matrix, list_feature_name = _add_feature_to_matrix_if_not_too_correlated(scaled_matrix,
                                                                                         new_feature_scaled,
                                                                                         list_feature_name)
-    list_feature_name.append('feature_1*feature_2')
     return pd.DataFrame(scaled_matrix, columns=list_feature_name)
 
 

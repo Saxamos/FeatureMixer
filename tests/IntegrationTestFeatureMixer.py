@@ -1,5 +1,3 @@
-import pandas as pd
-
 from app.FeatureMixer import *
 
 
